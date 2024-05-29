@@ -26,11 +26,12 @@ const TodoModal = ({ setShowModal, fileName, restoring, fetchFileList}) => {
       setShowModal(false);
       const restoredFile = await dataBackupRequests.restoreFile(fileName.name);
       
-      if (restoredFile.status===505 || restoredFile.status===404) {
+      if (restoredFile.status===505 || restoredFile.status===404 || restoredFile.status===403) {
         restoring(false);
         await fetchFileList();
       }else{
         restoring(false);
+        location.reload();
         await fetchFileList();
       }
     } catch (e) {

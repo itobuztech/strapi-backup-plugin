@@ -70,11 +70,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
   },
 
-  async listFiles(){
-    const folderPath = './public/downloads/backupfiles';
-    return fs.readdirSync(folderPath, { recursive: true });
-  },
-
   async listFilesWithDetails(){
     const folderPath = './public/downloads/backupfiles';
 
@@ -129,6 +124,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const userHomeDir = homedir();
 
     if (fileSplitedParts[1]!=='zip') {
+      console.log({errMsg: 'Invalid file type!', status: 403});
+      
       return JSON.stringify({errMsg: 'This is not a zip file!', status: 404});
     }
 
@@ -147,34 +144,33 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     } catch (err) {
       return JSON.stringify({errMsg: "File not found!", status: 404, err});
     }
-    
+
     try {
-     return tar.extract({
+      await tar.extract({
         f: `${filePath}`,
         cwd: `public/restored`
-      }).then(()=>{
-        try {     
-          const execSync = require('child_process').execSync;
-
-          fs.cpSync(`public/restored/${fileName}/config`, `config`, { recursive: true });
-
-          execSync(`rsync -a --exclude='strapi-backup-plugin' 'public/restored/${fileName}/source/' 'src'`);
-
-          fs.rmSync(path.resolve(`public/restored/${fileName}/source`), {recursive: true});
-          
-          const output =  execSync(`npm run strapi import -- -f public/restored/${fileName}/${dataFile} --force`);
-     
-          const result = output ? { message : "Data imported successfully!", status: 200 } : { errorMsg : "Data could not be imported!", status: 404 };
-
-          // execSync('npm run build', {cwd: `src/plugins/strapi-backup-plugin`});
-
-          return JSON.stringify(result);
-        } catch (err) {
-          return JSON.stringify({errMsg: 'No such file', status: 505, err});
-        }
       });
+
+      const execSync = require('child_process').execSync;
+
+      fs.cpSync(`public/restored/${fileName}/config`, `config`, { recursive: true });
+
+      execSync(`rsync -a --exclude='strapi-backup-plugin' 'public/restored/${fileName}/source/' 'src'`);
+      
+      fs.rmSync(path.resolve(`public/restored/${fileName}/source`), {recursive: true});
+      
+      const output =  execSync(`npm run strapi import -- -f public/restored/${fileName}/${dataFile} --force`);
+  
+      const result = output ? { message : "Data imported successfully!", status: 200 } : { errorMsg : "Data could not be imported!", status: 404 };
+      fs.rmSync(path.resolve(`public/restored/${fileName}`), {recursive: true});
+      // execSync('npm run build', {cwd: `src/plugins/strapi-backup-plugin`}); // not applicable if the plugin is downloaded in 'node_modules' as npm package.
+      return JSON.stringify(result);
+      
     } catch (err) {
-      return JSON.stringify({errMsg: "Something went wrong!", status: 505, err});
+      console.log({errMsg: "Unrecognized archive format!", status: 505, err});
+      fs.unlinkSync(`public/restored/${zippedFile}`);
+      return JSON.stringify({errMsg: "Unrecognized archive format!", status: 505, err});
     }
+
   }
 });
