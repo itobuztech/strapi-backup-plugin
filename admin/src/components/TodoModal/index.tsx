@@ -21,17 +21,17 @@ const TodoModal = ({ setShowModal, fileName, restoring, fetchFileList, handleErr
       const formData = new FormData();
       formData.append('file', fileName);
       formData.append('fileName', fileName.name);
-      await restoring(true);
+      restoring(true);
       setShowModal(false);
       const restoredFile = await dataBackupRequests.restoreFile(fileName.name);
       
       if (restoredFile.status===505 || restoredFile.status===404 || restoredFile.status===403) {
-        await restoring(false);
+        restoring(false);
         await fetchFileList();
         console.log(`${restoredFile.status}: ${restoredFile.errMsg}`);       
         handleError(`${restoredFile.status}: ${restoredFile.errMsg}`);
       }else{
-        await restoring(false);
+        restoring(false);
         await fetchFileList();
       }
     } catch (e) {    

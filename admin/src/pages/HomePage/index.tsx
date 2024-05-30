@@ -43,7 +43,12 @@ const HomePage = ({loading}) => {
 
   let fetchFileList = async () => {
     try {
+      console.log('...in fetchFileList...');
+      
       const files = await dataBackupRequests.listFilesWithDetails();  
+
+      console.log('files :---', files);
+
           
       if (!files.length) {
         setFileList(files);
@@ -113,8 +118,8 @@ const HomePage = ({loading}) => {
     });
   }, []);
 
-  const restoring = async (boolValue:boolean) => {
-   await loading(boolValue, 'Restoring');
+  const restoring = (boolValue:boolean) => {
+    loading(boolValue, 'Restoring');
   }
 
   const handleError = (e) =>{

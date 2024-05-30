@@ -16,7 +16,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [processName, setProcessName] = useState('');
 
-  const loading = async (boolValue:boolean, process:string) => {
+  const loading = (boolValue:boolean, process:string) => {
     setIsLoading(boolValue);
     setProcessName(process);
   }
