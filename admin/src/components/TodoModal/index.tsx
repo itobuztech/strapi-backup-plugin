@@ -12,8 +12,7 @@ import {
 
 import { dataBackupRequests } from '../../api/dataBackup';
 
-const TodoModal = ({ setShowModal, fileName, restoring, fetchFileList}) => {
-
+const TodoModal = ({ setShowModal, fileName, restoring, fetchFileList, handleError}) => {
   const restoreBackup = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -22,20 +21,22 @@ const TodoModal = ({ setShowModal, fileName, restoring, fetchFileList}) => {
       const formData = new FormData();
       formData.append('file', fileName);
       formData.append('fileName', fileName.name);
-      restoring(true);
+      await restoring(true);
       setShowModal(false);
       const restoredFile = await dataBackupRequests.restoreFile(fileName.name);
       
       if (restoredFile.status===505 || restoredFile.status===404 || restoredFile.status===403) {
-        restoring(false);
+        await restoring(false);
         await fetchFileList();
+        console.log(`${restoredFile.status}: ${restoredFile.errMsg}`);       
+        handleError(`${restoredFile.status}: ${restoredFile.errMsg}`);
       }else{
-        restoring(false);
-        location.reload();
+        await restoring(false);
         await fetchFileList();
       }
-    } catch (e) {
+    } catch (e) {    
       restoring(false);
+      handleError(`${restoredFile.status}: ${restoredFile.errMsg}`);
     }
   };  
 

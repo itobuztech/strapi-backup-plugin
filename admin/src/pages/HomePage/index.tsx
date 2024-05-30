@@ -19,20 +19,20 @@ const HomePage = ({loading}) => {
   const [fileName, setFileName] = useState();
   const [fileList, setFileList] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  let [errorMsg, setErrorMsg] = useState('');
 
   const createBackup = async (event: React.FormEvent<HTMLFormElement>) =>{
     event.preventDefault();
     event.stopPropagation();
     try {
-      setName(name);
-      loading(true, 'Creating');
+      setName(name);      
+      await loading(true, 'Creating');
       const newFile = await dataBackupRequests.create(name);
       if (newFile.status===505 || newFile.status===404) {
         setErrorMsg(`${newFile.status}: ${newFile.errorMsg}`);
       }
       
-      loading(false, 'Creating');
+      await loading(false, 'Creating');
       
       return await fetchFileList();
     } catch (error) {
@@ -43,15 +43,36 @@ const HomePage = ({loading}) => {
 
   let fetchFileList = async () => {
     try {
-      const files = await dataBackupRequests.listFilesWithDetails();
+      const files = await dataBackupRequests.listFilesWithDetails();  
+          
       if (!files.length) {
         setFileList(files);
       }
       setFileList(files);
     } catch (error) {
-      setErrorMsg(`: ${error}`);
+      setErrorMsg(`err:-- ${error}`);
     }
   }
+
+  // Alternative way:- In this case, there isn't need to call frontend api defination in the '/src/admin/api/dataBackup.ts' file. Call the API provided from the backend side.
+
+  /*let fetchFileList = async () => {
+    try {
+      const files = [];
+      fetch(`/strapi-backup-plugin/listFilesWithDetails`)
+      .then(response => {
+        return response.json();
+      }).then((files)=>{
+        console.log("files :---", files);
+        setFileList(files);
+      })
+      .catch(error => {
+        setErrorMsg(`: ${error}`);
+      });
+    } catch (error) {
+      setErrorMsg(`: ${error}`);
+    }
+  }*/
 
   let deleteFile = async (name:string) => {
     try {
@@ -68,7 +89,7 @@ const HomePage = ({loading}) => {
 
   let downloadLink = async (fileName:string) =>{
    try {
-    loading(true, 'Downloading');
+    await loading(true, 'Downloading');
     const bufferObject = await dataBackupRequests.downloadFile(fileName);
     const uint8Array = new Uint8Array(bufferObject.data);
     const blob = new Blob([uint8Array]);
@@ -79,9 +100,9 @@ const HomePage = ({loading}) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    loading(false, 'Downloading');
+    await loading(false, 'Downloading');
    } catch (error) {
-    loading(false, 'Downloading');
+    await loading(false, 'Downloading');
     setErrorMsg(`: ${error}`);
    }
   }
@@ -92,8 +113,12 @@ const HomePage = ({loading}) => {
     });
   }, []);
 
-  const restoring = (boolValue:boolean) => {
-    loading(boolValue, 'Restoring');
+  const restoring = async (boolValue:boolean) => {
+   await loading(boolValue, 'Restoring');
+  }
+
+  const handleError = (e) =>{
+    setErrorMsg(`: ${e}`);
   }
   
   return (
@@ -171,7 +196,7 @@ const HomePage = ({loading}) => {
           )}
           
         </ContentLayout>
-        {showModal && <TodoModal restoring={restoring} setShowModal={setShowModal} fileName={fileName} fetchFileList={fetchFileList}/>}
+        {showModal && <TodoModal restoring={restoring} setShowModal={setShowModal} fileName={fileName} fetchFileList={fetchFileList} handleError={handleError}/>}
     </>
   );
 };

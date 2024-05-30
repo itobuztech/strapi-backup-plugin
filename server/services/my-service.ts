@@ -125,7 +125,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     if (fileSplitedParts[1]!=='zip') {
       console.log({errMsg: 'Invalid file type!', status: 403});
       
-      return JSON.stringify({errMsg: 'This is not a zip file!', status: 404});
+      return JSON.stringify({errMsg: 'Invalid file type!', status: 403});
     }
 
     if (!fs.existsSync(directoryPath)) {
@@ -135,7 +135,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     try {
       fs.accessSync('public/restored', fs.constants.W_OK);
     } catch (err) { 
-      return JSON.stringify({errMsg: "'public/restored' is not writable!", err});
+      return JSON.stringify({errMsg: "'public/restored' is not writable!", err, status: 404});
     } 
 
     try {
