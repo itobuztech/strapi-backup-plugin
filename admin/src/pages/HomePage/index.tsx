@@ -43,13 +43,7 @@ const HomePage = ({loading}) => {
 
   let fetchFileList = async () => {
     try {
-      console.log('...in fetchFileList...');
-      
-      const files = await dataBackupRequests.listFilesWithDetails();  
-
-      console.log('files :---', files);
-
-          
+      const files = await dataBackupRequests.listFilesWithDetails();    
       if (!files.length) {
         setFileList(files);
       }
