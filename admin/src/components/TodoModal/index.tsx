@@ -1,4 +1,3 @@
-
 // @ts-nocheck
 import {
   ModalLayout,
@@ -25,7 +24,7 @@ const TodoModal = ({ setShowModal, fileName, restoring, fetchFileList, handleErr
       setShowModal(false);
       const restoredFile = await dataBackupRequests.restoreFile(fileName.name);
       
-      if (restoredFile.status===505 || restoredFile.status===404 || restoredFile.status===403) {
+      if (restoredFile.error) {
         restoring(false);
         await fetchFileList();
         console.log(`${restoredFile.status}: ${restoredFile.errMsg}`);       

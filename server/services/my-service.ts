@@ -32,7 +32,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         try {
           fs.chmodSync(`${fileName}`, 0o444); 
         } catch (error) {
-          return {errMsg: "Something went wrong in file access!", status:404, error}
+          return JSON.stringify({errMsg: "Something went wrong in file access!", status:404, error});
         }
       }
 
@@ -51,8 +51,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       });
 
       return this.zip(backupFileName);
-     }catch (err) {
-       return { status: 505, err};
+     }catch (error) {
+       return JSON.stringify({errMsg: "Something went wrong in backup creation!", status: 505, error});
      }
   },
 
@@ -67,6 +67,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     ).then(() => {      
       fs.rmSync(path.resolve(`public/downloads/backupfiles/${backupFileName}`), {recursive: true});
       return JSON.stringify({msg: 'Success', file: `${backupFileName}.zip`, status: 200});
+    }).catch((error)=>{
+      return JSON.stringify({errorMsg: 'Error downloading the file', status: 505, error});
     });
   },
 
@@ -99,7 +101,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       fs.unlinkSync(filePath);
       return {message: 'File deleted successfully', status: 200};
     } catch (error) {
-      return {errorMsg: 'Error deleting the file', status: 500, error};
+      return JSON.stringify({errorMsg: 'Error deleting the file', status: 500, error});
     } 
   },
 
@@ -110,7 +112,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       
       return JSON.stringify(data);
     } catch (error) {
-      return {errorMsg: 'Error downloading the file', status: 500, error};
+      return JSON.stringify({errorMsg: 'Error downloading the file', status: 500, error});
     } 
   },
  
@@ -134,14 +136,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     try {
       fs.accessSync('public/restored', fs.constants.W_OK);
-    } catch (err) { 
-      return JSON.stringify({errMsg: "'public/restored' is not writable!", err, status: 404});
+    } catch (error) { 
+      return JSON.stringify({errMsg: "'public/restored' is not writable!", error, status: 404});
     } 
 
     try {
       fs.copyFileSync(`${userHomeDir}/Downloads/${zippedFile}`, `${filePath}`);
-    } catch (err) {
-      return JSON.stringify({errMsg: "File not found!", status: 404, err});
+    } catch (error) {
+      return JSON.stringify({errMsg: "File not found!", status: 404, error});
     }
 
     try {
@@ -160,15 +162,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       
       const output =  execSync(`npm run strapi import -- -f public/restored/${fileName}/${dataFile} --force`);
   
-      const result = output ? { message : "Data imported successfully!", status: 200 } : { errorMsg : "Data could not be imported!", status: 404 };
+      const result = output ? { message : "Data imported successfully!", status: 200 } : { errorMsg : "Data could not be imported!", status: 404, error: "Data could not be imported!" };
       fs.rmSync(path.resolve(`public/restored/${fileName}`), {recursive: true});
       // execSync('npm run build', {cwd: `src/plugins/strapi-backup-plugin`}); // not applicable if the plugin is downloaded in 'node_modules' as npm package.
       return JSON.stringify(result);
       
-    } catch (err) {
-      console.log({errMsg: "Unrecognized archive format!", status: 505, err});
+    } catch (error) {
+      console.log({errMsg: "Unrecognized archive format!", status: 505, error});
       fs.unlinkSync(`public/restored/${zippedFile}`);
-      return JSON.stringify({errMsg: "Unrecognized archive format!", status: 505, err});
+      return JSON.stringify({errMsg: "Unrecognized archive format!", status: 505, error});
     }
   }
 });

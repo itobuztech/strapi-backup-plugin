@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  *
  * This component is the skeleton around the actual pages, and should only
@@ -11,6 +12,7 @@ import { AnErrorOccurred } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import HomePage from '../HomePage';
 import { Loader } from '@strapi/design-system';
+
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);

@@ -14,30 +14,38 @@ import { FileTable } from '../../components/FileTable';
 import { TotalFileCount } from '../../components/TotalFileCount';
 import TodoModal from '../../components/TodoModal';
 
-const HomePage = ({loading}) => {
+interface IPROPS{
+  loading: void
+}
+
+interface errState{
+  em: string
+}
+
+const HomePage:React.FC= ({loading}) => {
   const [name, setName] = useState('');
   const [fileName, setFileName] = useState();
   const [fileList, setFileList] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  let [errorMsg, setErrorMsg] = useState('');
+  let [errorMsg, setErrorMsg] = useState<errState>({em: ''});
 
   const createBackup = async (event: React.FormEvent<HTMLFormElement>) =>{
     event.preventDefault();
     event.stopPropagation();
     try {
       setName(name);      
-      await loading(true, 'Creating');
+      loading(true, 'Creating');
       const newFile = await dataBackupRequests.create(name);
       if (newFile.status===505 || newFile.status===404) {
-        setErrorMsg(`${newFile.status}: ${newFile.errorMsg}`);
+        setErrorMsg({em: `${newFile.status}: ${newFile.errorMsg}`});
       }
       
-      await loading(false, 'Creating');
+      loading(false, 'Creating');
       
       return await fetchFileList();
     } catch (error) {
       loading(false, 'Creating');
-      setErrorMsg(`: ${error}`);
+      setErrorMsg({em: `: ${error}`});
     }
   }
 
@@ -49,7 +57,7 @@ const HomePage = ({loading}) => {
       }
       setFileList(files);
     } catch (error) {
-      setErrorMsg(`err:-- ${error}`);
+      setErrorMsg({em: `: ${error}`});
     }
   }
 
@@ -77,12 +85,12 @@ const HomePage = ({loading}) => {
     try {
       const existingFile = await dataBackupRequests.deleteFile(name);
       if (existingFile.status===505 || existingFile.status===404) {
-        setErrorMsg(`${existingFile.status}: ${existingFile.errorMsg}`);
+        setErrorMsg({em: `${existingFile.status}: ${existingFile.errorMsg}`});
       }
 
       return await fetchFileList();
     } catch (error) {
-      setErrorMsg(`: ${error}`);
+      setErrorMsg({em: `: ${error}`});
     }
   }
 
@@ -102,7 +110,7 @@ const HomePage = ({loading}) => {
     await loading(false, 'Downloading');
    } catch (error) {
     await loading(false, 'Downloading');
-    setErrorMsg(`: ${error}`);
+    setErrorMsg({em: `: ${error}`});
    }
   }
 
@@ -116,8 +124,10 @@ const HomePage = ({loading}) => {
     loading(boolValue, 'Restoring');
   }
 
-  const handleError = (e) =>{
-    setErrorMsg(`: ${e}`);
+  const handleError = (e):void =>{
+    console.log("{em: `: ${e}`} :----", {em: `: ${e}`});
+    
+    setErrorMsg({em: `: ${e}`});
   }
   
   return (
@@ -131,7 +141,7 @@ const HomePage = ({loading}) => {
         </Layout>
         
         <ContentLayout>
-          {errorMsg && (
+          {errorMsg.em && (
           <>
             <Box style={{width: 700}}>
               <Flex direction="column" alignItems="center" spacing={1}>

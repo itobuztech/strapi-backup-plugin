@@ -1,7 +1,7 @@
 # Strapi plugin strapi-backup-plugin
 'Strapi Backup Plugin' empowers users to create comprehensive backups of their strapi websites, which can be stored in the local machine drive and restored on any blank strapi project.
 
-***WARNING***
+***WARNING : ***
 This plugin will override the existing data of your project on restoring a backup file.
 But the existing 'Data models' and 'Plugins' will remain intact.
 
