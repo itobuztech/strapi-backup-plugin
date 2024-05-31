@@ -1,6 +1,6 @@
 {
   "name": "strapi-backup-plugin",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "'Strapi Backup Plugin' empowers users to create comprehensive backups of their strapi websites, which can be stored in the local machine drive and restored on any blank strapi project.",
   "strapi": {
     "name": "strapi-backup-plugin",
